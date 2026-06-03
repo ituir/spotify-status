@@ -3,12 +3,12 @@
 
 :root {
   --green: 30, 215, 96;
-  --radius: 24px;
-  --card-bg: rgba(15, 15, 15, 0.55);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(12, 12, 12, 0.55);
+  --card-border: rgba(255, 255, 255, 0.07);
   --text: #fff;
-  --muted: rgba(255,255,255,0.5);
-  --dim: rgba(255,255,255,0.28);
+  --muted: rgba(255,255,255,0.45);
+  --dim: rgba(255,255,255,0.22);
+  --radius: 20px;
 }
 
 /* ── Background ─────────────────────────────────────────────── */
@@ -25,71 +25,96 @@ body {
 
 .bg-layer {
   position: fixed;
-  inset: -60px;
+  inset: -80px;
   background-size: cover;
   background-position: center;
-  filter: blur(80px) brightness(0.35) saturate(2);
-  transition: opacity 1.2s ease;
+  filter: blur(90px) brightness(0.28) saturate(2.2);
+  transition: opacity 1.4s ease;
   z-index: 0;
 }
-
 #bg-b { opacity: 0; }
 
 .bg-vignette {
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.7) 100%);
+  background: radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(0,0,0,0.6) 100%);
   z-index: 1;
 }
 
-/* ── Lyrics background ───────────────────────────────────────── */
-.lyrics-bg {
+/* ── Lyrics overlay — fixed top-right, blurred, no interaction ─ */
+.lyrics-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  width: clamp(240px, 36%, 480px);
+  height: 100dvh;
+  overflow: hidden;           /* hides scrollbar; JS still scrolls it */
+  pointer-events: none;       /* completely non-interactive */
   z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  overflow: hidden;
+  /* fade mask at top and bottom */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
 }
 
-#lyrics-lines {
-  width: 100%;
-  max-width: 700px;
-  padding: 0 32px;
+#lyrics-scroll {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 18px;
-  text-align: center;
+  padding: 50vh 36px 50vh 16px; /* large vertical padding so first/last can centre */
+  text-align: right;
 }
 
 .lyric-line {
-  font-size: clamp(16px, 3.5vw, 26px);
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: -0.3px;
-  color: #fff;
-  opacity: 0.08;
-  transition: opacity 0.6s ease, transform 0.6s ease, font-size 0.3s ease;
-  will-change: opacity, transform;
-  white-space: normal;
-  word-break: break-word;
+  color: rgba(255,255,255,0.0);
+  line-height: 1.55;
+  filter: blur(4px);
+  transition: color 0.5s ease, filter 0.5s ease, font-size 0.35s ease;
+  user-select: none;
 }
 
-.lyric-line.prev-2  { opacity: 0.07; transform: translateY(-4px) scale(0.95); }
-.lyric-line.prev-1  { opacity: 0.15; transform: translateY(-2px) scale(0.97); }
-.lyric-line.current { opacity: 0.55; transform: scale(1.04); font-size: clamp(18px, 4vw, 30px); }
-.lyric-line.next-1  { opacity: 0.15; transform: translateY(2px)  scale(0.97); }
-.lyric-line.next-2  { opacity: 0.07; transform: translateY(4px)  scale(0.95); }
+/* Lines that have passed */
+.lyric-line.past {
+  color: rgba(255,255,255,0.1);
+  filter: blur(3px);
+}
+
+/* Upcoming lines */
+.lyric-line.upcoming {
+  color: rgba(255,255,255,0.08);
+  filter: blur(4px);
+}
+
+/* Current line — most visible, least blurred */
+.lyric-line.active {
+  color: rgba(255,255,255,0.55);
+  filter: blur(0.5px);
+  font-size: 16px;
+}
+
+/* Hide lyrics on very small screens so they don't cover the card */
+@media (max-width: 480px) {
+  .lyrics-overlay { display: none; }
+}
 
 /* ── App shell ───────────────────────────────────────────────── */
 #app {
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 420px;
   padding: 20px;
 }
 
@@ -97,42 +122,23 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
   gap: 20px;
   text-align: center;
 }
 
 .hidden { display: none !important; }
 
-/* ── Auth screen ─────────────────────────────────────────────── */
-.logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
+/* ── Spinner ─────────────────────────────────────────────────── */
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: rgb(var(--green));
+  border-radius: 50%;
+  animation: spin-a 0.75s linear infinite;
 }
-
-.logo h1 {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.subtitle {
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.setup-hint {
-  font-size: 12px;
-  color: var(--dim);
-  max-width: 280px;
-  line-height: 1.7;
-}
-
-.setup-hint a {
-  color: rgb(var(--green));
-  text-decoration: none;
-}
+@keyframes spin-a { to { transform: rotate(360deg); } }
 
 /* ── Buttons ─────────────────────────────────────────────────── */
 button {
@@ -140,277 +146,134 @@ button {
   color: #000;
   border: none;
   border-radius: 500px;
-  padding: 13px 32px;
+  padding: 12px 28px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.4px;
-  transition: transform 80ms ease, filter 100ms ease;
+  transition: transform 80ms, filter 100ms;
 }
-
 button:hover  { filter: brightness(1.1); }
 button:active { transform: scale(0.96); }
-
-#disconnect-btn {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 8px 22px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-#disconnect-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.3); filter: none; }
-
-/* ── Player card ─────────────────────────────────────────────── */
-.player-card {
-  width: 100%;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: 28px;
-  backdrop-filter: blur(30px) saturate(1.4);
-  -webkit-backdrop-filter: blur(30px) saturate(1.4);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
-  min-height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* ── Not playing ─────────────────────────────────────────────── */
 .not-playing {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   color: var(--dim);
   font-size: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 48px 60px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
-/* ── Playing layout ──────────────────────────────────────────── */
-#playing {
+/* ── Player card ─────────────────────────────────────────────── */
+.player-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: 28px;
+  width: 100%;
+  max-width: 360px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
-  width: 100%;
+  gap: 20px;
+}
+
+/* On wider screens, shift the card slightly left so lyrics have room */
+@media (min-width: 700px) {
+  .player-card { transform: translateX(-14%); }
 }
 
 /* ── Disc ────────────────────────────────────────────────────── */
-.disc-link { display: block; text-decoration: none; }
+.disc-link { display: block; text-decoration: none; flex-shrink: 0; }
 
 .disc {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 170px; height: 170px;
   border-radius: 50%;
   overflow: hidden;
   box-shadow:
-    0 0 0 6px rgba(255,255,255,0.06),
-    0 0 0 12px rgba(255,255,255,0.03),
-    0 16px 40px rgba(0,0,0,0.6);
-  animation: none;
+    0 0 0 6px rgba(255,255,255,0.05),
+    0 0 0 12px rgba(255,255,255,0.025),
+    0 14px 40px rgba(0,0,0,0.55);
   transition: box-shadow 0.4s ease;
 }
+.disc.spinning { animation: vinyl 9s linear infinite; }
+.disc.paused   { animation: vinyl 9s linear infinite; animation-play-state: paused; }
+@keyframes vinyl { to { transform: rotate(360deg); } }
 
-.disc.spinning {
-  animation: spin 8s linear infinite;
-}
-
-.disc.paused {
-  animation: spin 8s linear infinite;
-  animation-play-state: paused;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-#album-art {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  display: block;
-}
+#album-art { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
 .disc-hole {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   translate: -50% -50%;
-  width: 20px;
-  height: 20px;
+  width: 18px; height: 18px;
   border-radius: 50%;
   background: #111;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
   pointer-events: none;
 }
 
 .disc-link:hover .disc {
   box-shadow:
-    0 0 0 6px rgba(var(--green), 0.2),
-    0 0 0 12px rgba(var(--green), 0.06),
-    0 16px 40px rgba(0,0,0,0.6);
+    0 0 0 6px rgba(var(--green),0.2),
+    0 0 0 12px rgba(var(--green),0.07),
+    0 14px 40px rgba(0,0,0,0.55);
 }
 
 /* ── Track info ──────────────────────────────────────────────── */
-.track-info {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: center;
-}
+.track-info { width: 100%; display: flex; flex-direction: column; gap: 4px; text-align: center; }
 
-/* Now playing pill */
 .now-playing-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.6px; text-transform: uppercase;
   color: rgb(var(--green));
-  margin-bottom: 6px;
-  align-self: center;
+  margin-bottom: 4px; align-self: center;
 }
 
-/* Animated bars */
-.bars {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 10px;
-}
-
+.bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
 .bars i {
-  display: block;
-  width: 2px;
-  background: rgb(var(--green));
-  border-radius: 1px;
-  animation: bar 1s ease-in-out infinite;
+  display: block; width: 2px;
+  background: rgb(var(--green)); border-radius: 1px;
+  animation: bar-a 1s ease-in-out infinite;
 }
-
 .bars i:nth-child(2) { animation-delay: .2s; }
 .bars i:nth-child(3) { animation-delay: .4s; }
 .bars i:nth-child(4) { animation-delay: .6s; }
+@keyframes bar-a { 0%,100% { height: 3px; } 50% { height: 10px; } }
 
-@keyframes bar {
-  0%, 100% { height: 3px; }
-  50%       { height: 10px; }
-}
-
-/* Marquee for long text */
-.marquee-wrap {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-/* mask fade at edges when scrolling */
+.marquee-wrap { overflow: hidden; width: 100%; }
 .marquee-wrap.scrolling {
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }
-
 .marquee-wrap.scrolling > div {
-  display: inline-block;
-  white-space: nowrap;
+  display: inline-block; white-space: nowrap;
   animation: marquee 12s linear infinite;
   padding-right: 60px;
 }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+.track-name  { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.artist-name { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.album-name  { font-size: 11px; color: var(--dim);   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.track-name {
-  font-size: 18px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
-}
-
-.artist-name {
-  font-size: 14px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.album-name {
-  font-size: 11px;
-  color: var(--dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 2px;
-}
-
-/* ── Progress ─────────────────────────────────────────────────── */
-.progress-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.time {
-  font-size: 10px;
-  color: var(--dim);
-  min-width: 30px;
-  font-variant-numeric: tabular-nums;
-}
-
+.progress-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.time { font-size: 10px; color: var(--dim); min-width: 28px; font-variant-numeric: tabular-nums; }
 .time.right { text-align: right; }
+.progress-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0%; background: rgb(var(--green)); border-radius: 2px; transition: width 1s linear; }
 
-.progress-bg {
-  flex: 1;
-  height: 3px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: rgb(var(--green));
-  border-radius: 2px;
-  transition: width 1s linear;
-}
-
-/* ── Error ────────────────────────────────────────────────────── */
-.error-msg {
-  color: #ff6b6b;
-  font-size: 14px;
-  max-width: 280px;
-  line-height: 1.6;
-}
-
-/* ── Responsive (wider screens) ──────────────────────────────── */
-@media (min-width: 500px) {
-  #playing {
-    flex-direction: row;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .disc { width: 140px; height: 140px; flex-shrink: 0; }
-
-  .track-info { text-align: left; }
-
-  .now-playing-pill { align-self: flex-start; }
-
-  .marquee-wrap > div,
-  .track-name,
-  .artist-name,
-  .album-name { text-align: left; }
-}
+/* ── Error ───────────────────────────────────────────────────── */
+.error-msg { color: #ff6b6b; font-size: 14px; max-width: 280px; line-height: 1.6; }
