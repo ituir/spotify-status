@@ -251,6 +251,7 @@ function renderTrack({ item, progress_ms, is_playing }) {
   disc.classList.toggle("spinning", is_playing);
   disc.classList.toggle("paused",   !is_playing);
   document.getElementById("bars").classList.toggle("hidden", !is_playing);
+  updatePlayPauseIcon(is_playing);
 
   updateProgress(item.duration_ms);
   clearInterval(tickId);
@@ -299,6 +300,46 @@ function crossfadeBg(url) {
   nextEl.style.opacity = "1";
   currEl.style.opacity = "0";
   bgSlot = next;
+}
+
+// ── Playback controls ─────────────────────────────────────────
+let currentlyPlaying = false;
+
+async function spotifyPut(endpoint) {
+  if (isExpired()) await refreshToken();
+  return fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, {
+    method: "PUT",
+    headers: { Authorization: "Bearer " + getToken() },
+  });
+}
+
+async function spotifyPost(endpoint) {
+  if (isExpired()) await refreshToken();
+  return fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + getToken() },
+  });
+}
+
+async function togglePlay() {
+  await (currentlyPlaying ? spotifyPut("pause") : spotifyPut("play"));
+  setTimeout(fetchNowPlaying, 300);
+}
+
+async function nextTrack() {
+  await spotifyPost("next");
+  setTimeout(fetchNowPlaying, 500);
+}
+
+async function prevTrack() {
+  await spotifyPost("previous");
+  setTimeout(fetchNowPlaying, 500);
+}
+
+function updatePlayPauseIcon(playing) {
+  currentlyPlaying = playing;
+  document.getElementById("icon-pause").classList.toggle("hidden", !playing);
+  document.getElementById("icon-play").classList.toggle("hidden",  playing);
 }
 
 // ── Screen helpers ────────────────────────────────────────────

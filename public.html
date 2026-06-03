@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spotify Status</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="bg-a" class="bg-layer"></div>
+  <div id="bg-b" class="bg-layer"></div>
+  <div class="bg-vignette"></div>
+
+  <div id="lyrics-overlay">
+    <div id="lyrics-scroll"></div>
+  </div>
+
+  <div id="player-screen">
+    <div id="playing">
+      <div class="player-card">
+        <div id="disc" class="disc">
+          <img id="album-art" src="" alt="Album art" />
+        </div>
+        <div class="track-info">
+          <div id="bars">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div id="track-name-wrapper" class="marquee-wrapper">
+            <span id="track-name" class="marquee-text"></span>
+          </div>
+          <div id="artist-name-wrapper" class="marquee-wrapper">
+            <span id="artist-name" class="marquee-text"></span>
+          </div>
+          <div id="album-name-wrapper" class="marquee-wrapper">
+            <span id="album-name" class="marquee-text"></span>
+          </div>
+          <a id="spotify-link" href="#" target="_blank" rel="noopener noreferrer">
+            Open in Spotify
+          </a>
+          <div class="progress-container">
+            <span id="progress-time">0:00</span>
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <span id="duration-time">0:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="not-playing">
+      <p>Not playing anything right now.</p>
+    </div>
+  </div>
+
+  <script src="public-config.js"></script>
+  <script src="public.js"></script>
+</body>
+</html>

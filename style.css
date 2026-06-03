@@ -275,5 +275,37 @@ button:active { transform: scale(0.96); }
 .progress-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; width: 0%; background: rgb(var(--green)); border-radius: 2px; transition: width 1s linear; }
 
+/* ── Playback controls ───────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ctrl-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, transform 80ms;
+}
+
+.ctrl-btn:hover  { color: var(--text); background: rgba(255,255,255,0.08); filter: none; }
+.ctrl-btn:active { transform: scale(0.9); }
+
+.ctrl-play {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+.ctrl-play:hover { background: rgba(255,255,255,0.18); }
+
 /* ── Error ───────────────────────────────────────────────────── */
 .error-msg { color: #ff6b6b; font-size: 14px; max-width: 280px; line-height: 1.6; }
